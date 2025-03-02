@@ -8,9 +8,9 @@ import joblib
 from fastapi.responses import HTMLResponse
 
 # Load the trained model and tokenizer
-model = joblib.load('model.pkl')
+model = joblib.load('app/model.pkl')
 
-with open('tokenizer.pickle', 'rb') as handle:
+with open('app/tokenizer.pickle', 'rb') as handle:
     tokenizer = pickle.load(handle)
 
 # Define constants
