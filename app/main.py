@@ -6,6 +6,7 @@ from lime.lime_text import LimeTextExplainer
 import pickle
 import joblib
 from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 # Load the trained model and tokenizer
 model = joblib.load('app/model.pkl')
@@ -20,6 +21,15 @@ explainer = LimeTextExplainer(class_names=class_names)
 
 # FastAPI app instance
 app = FastAPI(title="Sentiment Analysis with LIME Explainer")
+
+# Enable CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all domains (change this for security)
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
 
 # Define request model
 class InputText(BaseModel):
