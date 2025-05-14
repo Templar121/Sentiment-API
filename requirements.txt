@@ -1,0 +1,11 @@
+tensorflow==2.17.1
+beautifulsoup4==4.12.2
+numpy
+pandas
+scikit-learn
+joblib
+flask             
+gunicorn 
+pandas
+lime
+nltk==3.8.1
