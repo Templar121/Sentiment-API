@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from tensorflow.keras.preprocessing.sequence import pad_sequences
+from fastapi.middleware.cors import CORSMiddleware
 
 from model.loader import load_cnn_model
 from tokenizer.loader import load_tokenizer
@@ -15,6 +16,14 @@ app = FastAPI(
     title="Sentiment Analysis API",
     description="API for sentiment prediction and word contribution analysis using CNN",
     version="1.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # ← or ["https://your-frontend.onrender.com"]
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Load model and tokenizer
