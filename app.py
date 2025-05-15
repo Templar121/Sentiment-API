@@ -1,11 +1,3 @@
-import inspect
-if not hasattr(inspect, 'getargspec'):
-    def getargspec(func):
-        full = inspect.getfullargspec(func)
-        return (full.args, full.varargs, full.varkw, full.defaults)
-    inspect.getargspec = getargspec
-
-
 
 
 import re
