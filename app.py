@@ -5,7 +5,7 @@ from flask import Flask, request, jsonify
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from bs4 import BeautifulSoup
 import numpy as np
-from lime.lime_text import LimeTextExplainer
+
 
 from model.loader import load_cnn_model
 from tokenizer.loader import load_tokenizer
@@ -62,7 +62,7 @@ def preprocess_input_review(review):
     return review
 
 class_names = ['negative', 'positive']
-explainer = LimeTextExplainer(class_names=class_names)
+# explainer = shap.Explainer(model.predict, masker=shap.maskers.Text(tokenizer))
 
 def process_text(text):
     return text.lower()
@@ -107,6 +107,28 @@ def predict():
     })
     
     
+# @app.route('/analyze', methods=['POST'])
+# def analyze():
+#     data = request.get_json(force=True)
+#     review = data.get('review', '')
+
+#     if not review.strip():
+#         return jsonify({'error': 'Review text is required.'}), 400
+
+#     # Generate LIME explanation
+#     explanation = explainer.explain_instance(review, predict_proba, num_features=10)
+
+#     # Extract important features
+#     important_words = explanation.as_list()
+
+#     # Structure the response
+#     response = {
+#         'review': review,
+#         'explanation': [{'word': word, 'contribution': float(score)} for word, score in important_words]
+#     }
+
+#     return jsonify(response)
+
 @app.route('/analyze', methods=['POST'])
 def analyze():
     data = request.get_json(force=True)
@@ -115,19 +137,30 @@ def analyze():
     if not review.strip():
         return jsonify({'error': 'Review text is required.'}), 400
 
-    # Generate LIME explanation
-    explanation = explainer.explain_instance(review, predict_proba, num_features=10)
+    original_score = predict_proba([review])[0][1]  # e.g., positive class
 
-    # Extract important features
-    important_words = explanation.as_list()
+    words = review.split()
+    contributions = []
 
-    # Structure the response
+    for i in range(len(words)):
+        masked = words[:i] + ["<mask>"] + words[i+1:]
+        masked_text = " ".join(masked)
+        masked_score = predict_proba([masked_text])[0][1]
+        diff = original_score - masked_score
+        contributions.append((words[i], diff))
+
+    # Sort by absolute contribution
+    contributions.sort(key=lambda x: abs(x[1]), reverse=True)
+    top_contributions = contributions[:10]
+
     response = {
         'review': review,
-        'explanation': [{'word': word, 'contribution': float(score)} for word, score in important_words]
+        'explanation': [{'word': word, 'contribution': round(float(score), 4)} for word, score in top_contributions]
     }
 
     return jsonify(response)
+
+
 
 
 if __name__ == '__main__':
